@@ -10,15 +10,17 @@ module.exports = {
     try {
       const address = order.deliveryAddress;
       let savedAddress;
-      const isAddressExist = await Address.findById(address._id);
-      if (isAddressExist) {
-        savedAddress = isAddressExist;
+
+      if (address._id) {
+        savedAddress = await Address.findById(address._id);
       } else {
         const shippingAddress = new Address(order.deliveryAddress);
         savedAddress = await shippingAddress.save();
       }
 
-      if (!user.addresses.includes(savedAddress._id)) {
+      const addressExistsInUser = user.addresses.some(address => address._id.equals(savedAddress._id));
+
+      if (!addressExistsInUser) {
         user.addresses.push(savedAddress._id);
         await user.save();
       }
